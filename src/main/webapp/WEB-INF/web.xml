@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF8"?>
+<web-app xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+	metadata-complete="false" version="3.0">
+
+	<welcome-file-list>
+		<welcome-file>index.html</welcome-file>
+	</welcome-file-list>
+
+	<servlet>
+		<servlet-name>ReceiveMessage</servlet-name>
+		<servlet-class>demo.longpolling.ReceiveMessageServlet</servlet-class>
+		<async-supported>true</async-supported>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>ReceiveMessage</servlet-name>
+		<url-pattern>/api/receive_message.json</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>SendMessage</servlet-name>
+		<servlet-class>demo.longpolling.SendMessageServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>SendMessage</servlet-name>
+		<url-pattern>/api/send_message.json</url-pattern>
+	</servlet-mapping>
+</web-app>
