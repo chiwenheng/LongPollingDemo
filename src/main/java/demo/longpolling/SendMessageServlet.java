@@ -1,16 +1,20 @@
 package demo.longpolling;
 
-import java.io.IOException;
+import com.google.gson.JsonObject;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import com.google.gson.JsonObject;
+import java.io.IOException;
 
 @SuppressWarnings("serial")
 public class SendMessageServlet extends HttpServlet {
+	
+	@Override
+	protected void doGet(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws ServletException, IOException {
+		this.doPost(httpRequest, httpResponse);
+	}
 
 	@Override
 	protected void doPost(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws ServletException, IOException {
@@ -34,11 +38,12 @@ public class SendMessageServlet extends HttpServlet {
 			return;
 		}
 		
-		int seq = UserMessageHolder.getUserMessageHolder(toUserId).addMessage(fromUserId, content);
+		Message msg = UserMessageHolder.getUserMessageHolder(toUserId).addMessage(fromUserId, content);
 		
 		JsonObject obj = new JsonObject();
 		obj.addProperty("result", "SUCC");
-		obj.addProperty("seq", seq);
+		obj.addProperty("msg_seq", msg.getSeq());
+		obj.addProperty("msg_create_time", msg.getCreateTime());
 		
 		httpResponse.setContentType("application/json;charset=UTF-8");
 		GsonUtil.gson().toJson(obj, httpResponse.getWriter());

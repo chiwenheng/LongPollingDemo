@@ -3,22 +3,22 @@ package demo.longpolling;
 public class Message {
 
 	private final int seq;
-	private final int createTime;
+	private final long createTime;
 	private final String fromUserId;
 	private final String content;
 	
-	public Message(int seq, int createTime, String fromUserId, String content) {
-		this.seq = seq;
+	public Message(int seq, long createTime, String fromUserId, String content) {
+	    this.seq = seq;
 		this.createTime = createTime;
 		this.fromUserId = fromUserId;
 		this.content = content;
 	}
 
-	public int getSeq() {
-		return seq;
-	}
+    public int getSeq() {
+        return seq;
+    }
 	
-	public int getCreateTime() {
+	public long getCreateTime() {
 		return createTime;
 	}
 
@@ -30,25 +30,13 @@ public class Message {
 		return content;
 	}
 
-	@Override
-	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		builder.append("Message [seq=");
-		builder.append(seq);
-		builder.append(", createTime=");
-		builder.append(createTime);
-		builder.append(", ");
-		if (fromUserId != null) {
-			builder.append("fromUserId=");
-			builder.append(fromUserId);
-			builder.append(", ");
-		}
-		if (content != null) {
-			builder.append("content=");
-			builder.append(content);
-		}
-		builder.append("]");
-		return builder.toString();
-	}
-	
+    @Override
+    public String toString() {
+        return "Message{" +
+                "seq=" + seq +
+                ", createTime=" + createTime +
+                ", fromUserId='" + fromUserId + '\'' +
+                ", content='" + content + '\'' +
+                '}';
+    }
 }

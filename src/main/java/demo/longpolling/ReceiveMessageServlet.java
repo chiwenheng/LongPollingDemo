@@ -1,12 +1,11 @@
 package demo.longpolling;
 
-import java.io.IOException;
-import java.util.List;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.List;
 
 @SuppressWarnings("serial")
 public class ReceiveMessageServlet extends HttpServlet {
@@ -29,13 +28,26 @@ public class ReceiveMessageServlet extends HttpServlet {
 			}
 			userId = userId.trim();
 			
-			int lastSeq;
-			String lastSeqStr = httpRequest.getParameter("last_seq");
-			if (lastSeqStr == null || lastSeqStr.trim().isEmpty()) {
-				lastSeq = 0;
+			int lastMsgSeq;
+			String lastMsgSeqStr = httpRequest.getParameter("last_msg_seq");
+			if (lastMsgSeqStr == null || lastMsgSeqStr.trim().isEmpty()) {
+				lastMsgSeq = 0;
 			} else {
 				try {
-					lastSeq = Integer.parseInt(lastSeqStr);
+					lastMsgSeq = Integer.parseInt(lastMsgSeqStr);
+				} catch (NumberFormatException e) {
+					httpResponse.sendError(HttpServletResponse.SC_BAD_REQUEST);
+					return;
+				}
+			}
+
+			long lastMsgCreateTime;
+			String lastMsgCreateTimeStr = httpRequest.getParameter("last_msg_create_time");
+			if (lastMsgCreateTimeStr == null || lastMsgCreateTimeStr.trim().isEmpty()) {
+				lastMsgCreateTime = 0;
+			} else {
+				try {
+					lastMsgCreateTime = Long.parseLong(lastMsgCreateTimeStr);
 				} catch (NumberFormatException e) {
 					httpResponse.sendError(HttpServletResponse.SC_BAD_REQUEST);
 					return;
@@ -59,15 +71,15 @@ public class ReceiveMessageServlet extends HttpServlet {
 				}
 			}
 			
-			httpRequest.setAttribute(REQUEST_ATTR_PARAM, new Param(userId, lastSeq, size));
+			httpRequest.setAttribute(REQUEST_ATTR_PARAM, new Param(userId, lastMsgSeq, lastMsgCreateTime, size));
 			
-			List<Message> messageList = UserMessageHolder.getUserMessageHolder(userId).getMessageOrWait(lastSeq, size, httpRequest);
+			List<Message> messageList = UserMessageHolder.getUserMessageHolder(userId).getMessageOrWait(lastMsgSeq, lastMsgCreateTime, size, httpRequest);
 			if (!messageList.isEmpty()) {
 				httpResponse.setContentType("application/json;charset=UTF-8");
 				GsonUtil.gson().toJson(messageList, httpResponse.getWriter());
 			}
 		} else {
-			List<Message> messageList = UserMessageHolder.getUserMessageHolder(param.userId).getMessage(param.lastSeq, param.size);
+			List<Message> messageList = UserMessageHolder.getUserMessageHolder(param.userId).getMessage(param.lastMsgSeq, param.lastMsgCreateTime, param.size);
 			httpResponse.setContentType("application/json;charset=UTF-8");
 			GsonUtil.gson().toJson(messageList, httpResponse.getWriter());
 		}
@@ -75,12 +87,14 @@ public class ReceiveMessageServlet extends HttpServlet {
 	
 	private static class Param {
 		final String userId;
-		final int lastSeq;
+		final int lastMsgSeq;
+		final long lastMsgCreateTime;
 		final int size;
 		
-		public Param(String userId, int lastSeq, int size) {
+		public Param(String userId, int lastMsgSeq, long lastMsgCreateTime, int size) {
 			this.userId = userId;
-			this.lastSeq = lastSeq;
+			this.lastMsgSeq = lastMsgSeq;
+			this.lastMsgCreateTime = lastMsgCreateTime;
 			this.size = size;
 		}
 	}
