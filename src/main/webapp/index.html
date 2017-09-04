@@ -11,68 +11,68 @@ var g_last_msg_seq = 0;
 var g_last_msg_create_time = 0;
 
 $(function(){
-	while (!g_user_id || g_user_id == "") {
-		g_user_id = prompt('请输入当前用户ID');
-	}
-	
-	$("title").html("长轮询推送demo: " + g_user_id);
-	$("#from_user_id").val(g_user_id);
-	
-	// 开始长轮询
-	longPolling();
+    while (!g_user_id || g_user_id == "") {
+        g_user_id = prompt('请输入当前用户ID');
+    }
+    
+    $("title").html("长轮询推送demo: " + g_user_id);
+    $("#from_user_id").val(g_user_id);
+    
+    // 开始长轮询
+    longPolling();
 });
 
 // 长轮询
 function longPolling() {
-	$.ajax({
-		type: "POST",
-		url: "api/receive_message.json",
-		data: { "user_id": g_user_id, "last_msg_seq": g_last_msg_seq, "last_msg_create_time": g_last_msg_create_time, "size": 10},
-		timeout: 60000, // 60秒
-		dataType: 'json',
-		success: function(msgs) {
-			for (var i=0; i<msgs.length; i++) {
-				$("#message").prepend("已接收[序列号:" + msgs[i].seq + ", 创建时间: " + new Date(msgs[i].createTime).toLocaleString() + ", 发送人: " + msgs[i].fromUserId + ", 内容: " + msgs[i].content + " ]<br/>");
+    $.ajax({
+        type: "POST",
+        url: "api/receive_message.json",
+        data: { "user_id": g_user_id, "last_msg_seq": g_last_msg_seq, "last_msg_create_time": g_last_msg_create_time, "size": 10},
+        timeout: 60000, // 60秒
+        dataType: 'json',
+        success: function(msgs) {
+            for (var i=0; i<msgs.length; i++) {
+                $("#message").prepend("已接收[序列号:" + msgs[i].seq + ", 创建时间: " + new Date(msgs[i].createTime).toLocaleString() + ", 发送人: " + msgs[i].fromUserId + ", 内容: " + msgs[i].content + " ]<br/>");
                 g_last_msg_seq = msgs[i].seq;
                 g_last_msg_create_time = msgs[i].createTime;
-			}
-			longPolling();
-		},
-		error: function(data, textStatus) {
-			// 如果调用失败，休息3秒钟再调用。防止死循环
-			setTimeout(function () {
-				longPolling();
-		    }, 3000);
-		}
-	});
+            }
+            longPolling();
+        },
+        error: function(data, textStatus) {
+            // 如果调用失败，休息3秒钟再调用。防止死循环
+            setTimeout(function () {
+                longPolling();
+            }, 3000);
+        }
+    });
 }
 
 // 发送消息
 function sendMessage() {
-	$.ajax({
-		type: "POST",
-		url: "api/send_message.json",
-		data: { "from_user_id": g_user_id, "to_user_id": $("#to_user_id").val(), "content": $("#content").val()},
-		timeout: 5000,
-		dataType: 'json',
-		success: function(ret) {
-			alert("发送成功：" + ret.msg_seq + ", 时间：" + new Date(ret.msg_create_time).toLocaleString())
-		},
-		error: function(data, textStatus) {
-			alert("发送失败：" + textStatus + ", " + data)
-		}
-	});
+    $.ajax({
+        type: "POST",
+        url: "api/send_message.json",
+        data: { "from_user_id": g_user_id, "to_user_id": $("#to_user_id").val(), "content": $("#content").val()},
+        timeout: 5000,
+        dataType: 'json',
+        success: function(ret) {
+            alert("发送成功：" + ret.msg_seq + ", 时间：" + new Date(ret.msg_create_time).toLocaleString())
+        },
+        error: function(data, textStatus) {
+            alert("发送失败：" + textStatus + ", " + data)
+        }
+    });
 }
 
 </script>
 </head>
 <body>
-	<div>
-		当前用户：<input id="from_user_id" type="text" readonly="readonly" /> <br/>
-		发送对象：<input id="to_user_id" type="text"/> <br/>
-		发送内容：<input id="content" type="text"/> <br/>
-		<input type="button" value="点此发送" onclick="sendMessage();"/>
-	</div>
-	<div id="message"></div>
+    <div>
+        当前用户：<input id="from_user_id" type="text" readonly="readonly" /> <br/>
+        发送对象：<input id="to_user_id" type="text"/> <br/>
+        发送内容：<input id="content" type="text"/> <br/>
+        <input type="button" value="点此发送" onclick="sendMessage();"/>
+    </div>
+    <div id="message"></div>
 </body>
 </html>
